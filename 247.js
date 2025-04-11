@@ -4,38 +4,38 @@ const vec3 = require('vec3');
 function createBot() {
     console.log("📡 Creating bot...");
 
-    // Include auth: 'offline' for cracked servers
+    let loginAttempts = 0;
+
     const bot = mineflayer.createBot({
         host: 'Blarena.aternos.me',
         port: 30517,
         username: 'MineBot',
-        //version: '1.21.4',
         auth: 'offline'
     });
 
     const directions = ['forward', 'back', 'left', 'right'];
+    let gamemode = 'creative';
 
-    // Moved inside so that `bot` is available in this function.
+    function switchGamemode() {
+        gamemode = gamemode === 'creative' ? 'survival' : 'creative';
+        const cmd = `/gamemode creative`;
+        bot.chat(cmd);
+        console.log(`🎮 Switched to creative`);
+    }
+
     async function placeAndBreakBlock() {
         try {
-            // Get the block below the bot.
             const referenceBlock = bot.blockAt(bot.entity.position.offset(0, -1, 0));
-            if (!referenceBlock) {
-                console.log("🚫 No reference block found.");
-                return;
-            }
-            const targetPos = referenceBlock.position.offset(0, 1, 0);
+            if (!referenceBlock) return console.log("🚫 No reference block found.");
 
-            // Look for a grass block in the inventory.
+            const targetPos = referenceBlock.position.offset(0, 1, 0);
             const grassItem = bot.inventory.items().find(item => item.name.includes('grass'));
             if (!grassItem) return console.log("🚫 No grass block in inventory.");
 
-            // Equip and place the grass block.
             await bot.equip(grassItem, 'hand');
             await bot.placeBlock(referenceBlock, vec3(0, 1, 0));
             console.log(`🧱 Placed grass at ${targetPos}`);
 
-            // Delay then dig the placed block.
             setTimeout(async () => {
                 const block = bot.blockAt(targetPos);
                 if (block) {
@@ -51,8 +51,8 @@ function createBot() {
     function moveRandomly() {
         const dir = directions[Math.floor(Math.random() * directions.length)];
         const moveDuration = Math.random() * 4000 + 3000;
-
         const shouldSprint = Math.random() < 0.6;
+
         if (shouldSprint) {
             bot.setControlState('sprint', true);
             console.log(`💨 Sprinting ${dir} for ${moveDuration.toFixed(0)}ms`);
@@ -78,7 +78,6 @@ function createBot() {
             }
         }
 
-        // Stop the movement after moveDuration milliseconds.
         setTimeout(() => {
             bot.setControlState(dir, false);
             if (shouldSprint) bot.setControlState('sprint', false);
@@ -87,12 +86,17 @@ function createBot() {
         const pos = bot.entity.position;
         console.log(`📍 Moving to approx: X=${pos.x.toFixed(2)}, Y=${pos.y.toFixed(2)}, Z=${pos.z.toFixed(2)}`);
 
-        // Call the block placement/digging routine.
         placeAndBreakBlock();
+
+        // Occasionally switch gamemode
+        if (Math.random() < 0.25) {
+            switchGamemode();
+        }
     }
 
     bot.once('spawn', () => {
         console.log("✅ Bot spawned!");
+        loginAttempts = 0;
         setInterval(moveRandomly, 5000);
     });
 
@@ -111,6 +115,17 @@ function createBot() {
 
     bot.on('kicked', (reason) => {
         console.log("👢 Bot was kicked:", reason);
+    });
+
+    bot.on('error', (err) => {
+        console.error("❌ Connection error:", err.message);
+        if (loginAttempts < 5) {
+            loginAttempts++;
+            console.log(`🔁 Retry attempt ${loginAttempts} in 5s...`);
+            setTimeout(createBot, 5000);
+        } else {
+            console.log("💥 Max login attempts reached. Exiting.");
+        }
     });
 }
 
