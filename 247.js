@@ -75,34 +75,40 @@ function createBot() {
         }
     });
 
-let loginAttempts = 0;
-const maxAttempts = 10000;
+    let loginAttempts = 0;
+    const maxAttempts = 5; // Reduce max attempts to 5 or any reasonable value
 
-bot.on('error', (err) => {
-    console.error("❌ Bot error:", err.message);
-    if (err.code === 'ECONNREFUSED') {
-        console.log("🌐 Server offline or unreachable. Retrying in 10s...");
-    } else {
-        console.log("⚠️ Unknown error. Will retry.");
-    }
+    bot.on('error', (err) => {
+        console.error("❌ Bot error:", err.message);
+        if (err.code === 'ECONNREFUSED') {
+            console.log("🌐 Server offline or unreachable. Retrying in 10s...");
+        } else {
+            console.log("⚠️ Unknown error. Will retry.");
+        }
 
-    if (loginAttempts < maxAttempts) {
-        //loginAttempts++;
-        setTimeout(createBot, 10000); // Retry after 10 seconds
-    } else {
-        console.log("💥 Max retries reached. Bot stopped.");
-    }
-});
+        if (loginAttempts < maxAttempts) {
+            //loginAttempts++;
+            console.log(`🔁 Attempt ${loginAttempts}/${maxAttempts}`);
+            setTimeout(createBot, 10000); // Retry after 10 seconds
+        } else {
+            console.log("💥 Max retries reached. Bot stopped.");
+        }
+    });
 
-bot.on('end', () => {
-    console.log("🔌 Disconnected from server.");
-    if (loginAttempts < maxAttempts) {
-        //loginAttempts++;
-        console.log(`🔁 Reconnecting in 5s... (Attempt ${loginAttempts}/${maxAttempts})`);
-        setTimeout(createBot, 5000); // Retry after 5 seconds
-    } else {
-        console.log("💥 Max reconnect attempts hit. Exiting.");
-    }
-});
+    bot.on('end', () => {
+        console.log("🔌 Disconnected from server.");
+        if (loginAttempts < maxAttempts) {
+            //loginAttempts++;
+            console.log(`🔁 Reconnecting in 5s... (Attempt ${loginAttempts}/${maxAttempts})`);
+            setTimeout(createBot, 5000); // Retry after 5 seconds
+        } else {
+            console.log("💥 Max reconnect attempts hit. Exiting.");
+        }
+    });
+
+    bot.on('kicked', (reason) => {
+        console.log("👢 Kicked from server:", reason);
+    });
+}
 
 createBot();
