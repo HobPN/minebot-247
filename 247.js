@@ -10,7 +10,7 @@ function createBot() {
         host: 'Blarena.aternos.me',
         port: 30517,
         username: 'MineBot',
-        version: '1.21.4',
+        version: false,
         auth: 'offline'
     });
 
@@ -98,14 +98,14 @@ function createBot() {
 
     bot.once('spawn', () => {
         console.log("✅ Bot spawned!");
-        bot.chat('/register 134266 134266');
-        bot.chat('/login 134266');
         loginAttempts = 0;
         setInterval(moveRandomly, 5000);
     });
 
     bot.on('login', () => {
         console.log("🔓 Bot logged in!");
+        bot.chat('/register 134266 134266');
+        bot.chat('/login 134266');
     });
 
     bot.on('error', (err) => {
