@@ -105,7 +105,7 @@ function createBot() {
         console.log("✅ Bot spawned");
 
         loginTimeout = setTimeout(() => {
-            if (!isLoggedIn) {
+            if (5<0) {
                 console.log("⏳ Login timeout. Bot stuck or ignored. Reconnecting...");
                 bot.quit();
             }
