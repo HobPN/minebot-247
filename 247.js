@@ -99,7 +99,7 @@ function createBot() {
        // if (Math.random() < 0.25) {
          //   bot.chat('/gamemode creative');
         //}
-    //}
+    }
 
     bot.once('spawn', () => {
         console.log("✅ Bot spawned");
