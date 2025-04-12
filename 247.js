@@ -5,6 +5,8 @@ function createBot() {
     console.log("📡 Creating bot...");
 
     let loginAttempts = 0;
+    let isLoggedIn = false;
+    let loginTimeout;
 
     const bot = mineflayer.createBot({
         host: 'Blarena.aternos.me',
@@ -19,9 +21,9 @@ function createBot() {
 
     function switchGamemode() {
         gamemode = gamemode === 'creative' ? 'survival' : 'creative';
-        const cmd = `/gamemode creative`;
+        const cmd = `/gamemode ${gamemode}`;
         bot.chat(cmd);
-        console.log(`🎮 Switched to creative`);
+        console.log(`🎮 Switched to ${gamemode}`);
     }
 
     async function placeAndBreakBlock() {
@@ -31,8 +33,11 @@ function createBot() {
 
             const targetPos = referenceBlock.position.offset(0, 1, 0);
             const grassItem = bot.inventory.items().find(item => item.name.includes('grass'));
-            if (!grassItem) return console.log("🚫 No grass block in inventory.");
-            bot.chat('/give @s grass_block 64');
+
+            if (!grassItem) {
+                bot.chat('/give @s grass_block 64');
+                return;
+            }
 
             await bot.equip(grassItem, 'hand');
             await bot.placeBlock(referenceBlock, vec3(0, 1, 0));
@@ -90,46 +95,70 @@ function createBot() {
 
         placeAndBreakBlock();
 
-        // Occasionally switch gamemode
         if (Math.random() < 0.25) {
             switchGamemode();
         }
     }
 
     bot.once('spawn', () => {
-        console.log("✅ Bot spawned!");
-        loginAttempts = 0;
-        setInterval(moveRandomly, 5000);
+        console.log("✅ Bot spawned");
+
+        loginTimeout = setTimeout(() => {
+            if (!isLoggedIn) {
+                console.log("⏳ Login timeout. Bot stuck or ignored. Reconnecting...");
+                bot.quit();
+            }
+        }, 10000); // 10 seconds to login
+
+        setTimeout(() => {
+            bot.chat('/login 134266');
+            console.log("🔐 Sent /login");
+        }, 5000); // Wait 5 seconds after spawn
     });
 
-    bot.on('login', () => {
-        console.log("🔓 Bot logged in!");
-        bot.chat('/register 134266 134266');
-        bot.chat('/login 134266');
+    bot.on('message', (msg) => {
+        const text = msg.toString();
+        console.log("📩 Chat message:", text);
+
+        if (text.toLowerCase().includes('successfully logged in') || text.toLowerCase().includes('already logged in')) {
+            isLoggedIn = true;
+            clearTimeout(loginTimeout);
+            console.log("🔓 Logged in confirmed ✅");
+
+            // Start moving after login
+            setInterval(moveRandomly, 5000);
+        }
     });
 
     bot.on('error', (err) => {
-        console.error("❌ Bot error:", err);
+        console.error("❌ Bot error:", err.message);
+        if (err.code === 'ECONNREFUSED') {
+            console.log("🌐 Server offline or unreachable. Retrying in 10s...");
+        } else {
+            console.log("⚠️ Unknown error. Will retry.");
+        }
+
+        if (loginAttempts < 5) {
+            loginAttempts++;
+            setTimeout(createBot, 10000);
+        } else {
+            console.log("💥 Max retries reached. Bot stopped.");
+        }
     });
 
     bot.on('end', () => {
-        console.log("🔄 Bot disconnected. Reconnecting in 5s...");
-        setTimeout(createBot, 5000);
+        console.log("🔌 Disconnected from server.");
+        if (loginAttempts < 5) {
+            loginAttempts++;
+            console.log(`🔁 Reconnecting in 5s... (Attempt ${loginAttempts}/5)`);
+            setTimeout(createBot, 5000);
+        } else {
+            console.log("💥 Max reconnect attempts hit. Exiting.");
+        }
     });
 
     bot.on('kicked', (reason) => {
-        console.log("👢 Bot was kicked:", reason);
-    });
-
-    bot.on('error', (err) => {
-        console.error("❌ Connection error:", err.message);
-        if (loginAttempts < 5) {
-            loginAttempts++;
-            console.log(`🔁 Retry attempt ${loginAttempts} in 5s...`);
-            setTimeout(createBot, 5000);
-        } else {
-            console.log("💥 Max login attempts reached. Exiting.");
-        }
+        console.log("👢 Kicked from server:", reason);
     });
 }
 
