@@ -1,10 +1,12 @@
 const mineflayer = require('mineflayer');
 const vec3 = require('vec3');
 
+let bot = null;
+
 function createBot() {
     console.log("📡 Creating bot...");
 
-    const bot = mineflayer.createBot({
+    bot = mineflayer.createBot({
         host: 'Blarena.aternos.me',
         port: 30517,
         username: 'MineBot',
@@ -57,12 +59,11 @@ function createBot() {
 
     bot.once('spawn', () => {
         console.log("✅ Bot spawned");
-
         setTimeout(() => {
             bot.chat('/login 134266');
             bot.chat('/gamemode creative');
             console.log("🔐 Sent /login");
-        }, 5000); // Wait 5 seconds after spawn
+        }, 5000);
     });
 
     bot.on('message', (msg) => {
@@ -71,44 +72,39 @@ function createBot() {
 
         if (text.toLowerCase().includes('successfully logged in')) {
             console.log("🔓 Logged in confirmed ✅");
-            setInterval(moveRandomly, 5000); // Start moving after login
+            setInterval(moveRandomly, 5000);
         }
     });
 
-    let loginAttempts = 0;
-    const maxAttempts = 5; // Reduce max attempts to 5 or any reasonable value
-
     bot.on('error', (err) => {
         console.error("❌ Bot error:", err.message);
-        if (err.code === 'ECONNREFUSED') {
-            console.log("🌐 Server offline or unreachable. Retrying in 10s...");
-        } else {
-            console.log("⚠️ Unknown error. Will retry.");
-        }
-
-        if (loginAttempts < maxAttempts) {
-            //loginAttempts++;
-            console.log(`🔁 Attempt ${loginAttempts}/${maxAttempts}`);
-            setTimeout(createBot, 10000); // Retry after 10 seconds
-        } else {
-            console.log("💥 Max retries reached. Bot stopped.");
-        }
+        handleReconnect(err.code === 'ECONNREFUSED' ? "🌐 Server offline or unreachable." : "⚠️ Bot crashed or kicked unexpectedly.");
     });
 
     bot.on('end', () => {
         console.log("🔌 Disconnected from server.");
-        if (loginAttempts < maxAttempts) {
-            //loginAttempts++;
-            console.log(`🔁 Reconnecting in 5s... (Attempt ${loginAttempts}/${maxAttempts})`);
-            setTimeout(createBot, 5000); // Retry after 5 seconds
-        } else {
-            console.log("💥 Max reconnect attempts hit. Exiting.");
-        }
+        handleReconnect("🔁 Disconnected, retrying...");
     });
 
     bot.on('kicked', (reason) => {
         console.log("👢 Kicked from server:", reason);
+        handleReconnect("🔁 Kicked, retrying...");
     });
+}
+
+// Handles bot reconnection
+function handleReconnect(reason) {
+    console.log(reason);
+    if (bot) {
+        try { bot.quit(); } catch (e) {}
+        bot = null;
+    }
+
+    // Wait a few seconds before retrying
+    setTimeout(() => {
+        console.log("♻️ Reconnecting...");
+        createBot();
+    }, 10000); // 10 seconds
 }
 
 createBot();
