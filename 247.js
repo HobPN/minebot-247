@@ -20,12 +20,12 @@ function createBot() {
     const directions = ['forward', 'back', 'left', 'right'];
     let gamemode = 'creative';
 
-    function switchGamemode() {
-        gamemode = gamemode === 'creative' ? 'survival' : 'creative';
-        const cmd = `/gamemode ${gamemode}`;
-        bot.chat(cmd);
-        console.log(`🎮 Switched to ${gamemode}`);
-    }
+    //function switchGamemode() {
+        //gamemode = gamemode === 'creative' ? 'survival' : 'creative';
+        //const cmd = `/gamemode creative`;
+        //bot.chat(cmd);
+       // console.log(`🎮 Switched to creative`);
+   // }
 
     async function placeAndBreakBlock() {
         try {
@@ -97,7 +97,7 @@ function createBot() {
         placeAndBreakBlock();
 
         if (Math.random() < 0.25) {
-            switchGamemode();
+            bot.chat('/gamemode creative');
         }
     }
 
