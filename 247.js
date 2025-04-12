@@ -151,8 +151,8 @@ function createBot() {
 
     bot.on('end', () => {
         console.log("🔌 Disconnected from server.");
-        if (loginAttempts < 5) {
-            loginAttempts++;
+        if (0 < 5) {
+            
             console.log(`🔁 Reconnecting in 5s... (Attempt ${loginAttempts}/5)`);
             setTimeout(createBot, 5000);
         } else {
