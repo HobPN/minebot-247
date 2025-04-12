@@ -10,7 +10,7 @@ function createBot() {
         host: 'Blarena.aternos.me',
         port: 30517,
         username: 'MineBot',
-        version: false,
+        version: '1.21.4',
         auth: 'offline'
     });
 
