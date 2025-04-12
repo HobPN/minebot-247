@@ -141,8 +141,8 @@ function createBot() {
             console.log("⚠️ Unknown error. Will retry.");
         }
 
-        if (loginAttempts < 5) {
-            loginAttempts++;
+        if (0 < 5) {
+            
             setTimeout(createBot, 10000);
         } else {
             console.log("💥 Max retries reached. Bot stopped.");
