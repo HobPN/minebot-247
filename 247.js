@@ -96,10 +96,10 @@ function createBot() {
 
         placeAndBreakBlock();
 
-        if (Math.random() < 0.25) {
-            bot.chat('/gamemode creative');
-        }
-    }
+       // if (Math.random() < 0.25) {
+         //   bot.chat('/gamemode creative');
+        //}
+    //}
 
     bot.once('spawn', () => {
         console.log("✅ Bot spawned");
@@ -115,6 +115,7 @@ function createBot() {
             bot.chat('/login 134266');
             console.log("🔐 Sent /login");
         }, 5000); // Wait 5 seconds after spawn
+        bot.chat('/gamemode creative');
     });
 
     bot.on('message', (msg) => {
