@@ -10,6 +10,7 @@ function createBot() {
         host: 'Blarena.aternos.me',
         port: 30517,
         username: 'MineBot',
+        version: '1.21.4',
         auth: 'offline'
     });
 
@@ -31,6 +32,7 @@ function createBot() {
             const targetPos = referenceBlock.position.offset(0, 1, 0);
             const grassItem = bot.inventory.items().find(item => item.name.includes('grass'));
             if (!grassItem) return console.log("🚫 No grass block in inventory.");
+            bot.chat('/give @s grass_block 64');
 
             await bot.equip(grassItem, 'hand');
             await bot.placeBlock(referenceBlock, vec3(0, 1, 0));
@@ -96,6 +98,8 @@ function createBot() {
 
     bot.once('spawn', () => {
         console.log("✅ Bot spawned!");
+        bot.chat(/register 134266 134266');
+        bot.chat(/login 134266);
         loginAttempts = 0;
         setInterval(moveRandomly, 5000);
     });
