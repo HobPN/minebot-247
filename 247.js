@@ -1,6 +1,7 @@
 const mineflayer = require('mineflayer');
 const vec3 = require('vec3');
 
+
 function createBot() {
     console.log("📡 Creating bot...");
 
