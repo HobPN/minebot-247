@@ -113,9 +113,10 @@ function createBot() {
 
         setTimeout(() => {
             bot.chat('/login 134266');
+            bot.chat('/gamemode creative');
             console.log("🔐 Sent /login");
         }, 5000); // Wait 5 seconds after spawn
-        bot.chat('/gamemode creative');
+        
     });
 
     bot.on('message', (msg) => {
