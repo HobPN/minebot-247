@@ -1,3 +1,13 @@
-"scripts": {
-  "start": "node 247.js"
+{
+  "name": "mineflayer-bot",
+  "version": "1.0.0",
+  "description": "A Minecraft bot using mineflayer",
+  "main": "247.js",  // Entry point of your bot
+  "scripts": {
+    "start": "node 247.js"  // Start command to run the bot
+  },
+  "dependencies": {
+    "mineflayer": "^4.0.0",  // Replace with your actual dependencies
+    "vec3": "^0.0.1"
+  }
 }
