@@ -2,12 +2,12 @@
   "name": "mineflayer-bot",
   "version": "1.0.0",
   "description": "A Minecraft bot using mineflayer",
-  "main": "247.js",  // Entry point of your bot
+  "main": "247.js",
   "scripts": {
-    "start": "node 247.js"  // Start command to run the bot
+    "start": "node 247.js"
   },
   "dependencies": {
-    "mineflayer": "^4.0.0",  // Replace with your actual dependencies
+    "mineflayer": "^4.0.0",
     "vec3": "^0.0.1"
   }
 }
